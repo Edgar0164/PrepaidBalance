@@ -1,0 +1,2 @@
+Deze app houdt je prepaid saldo bij. Het kan automatisch opnemen en een melding plaatsen als uw saldo onder een configureerbare drempel daalt.
+Dit gebeurt door het verwerken van de reactie van een USSD-code, die kan worden ingesteld in de instellingen.

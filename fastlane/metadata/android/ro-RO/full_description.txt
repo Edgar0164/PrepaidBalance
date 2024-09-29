@@ -1,0 +1,2 @@
+Această aplicație ține evidența soldului dvs. preplătit. Poate înregistra automat și posta o notificare în cazul în care soldul dvs. scade sub un prag configurabil.
+Face acest lucru analizând răspunsul unui cod USSD, care poate fi setat în setări.

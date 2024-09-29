@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Translation instructions can be found in the Readme -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation, ExtraTranslation">
+    <string name="app_name">Prepaid-Guthaben</string>
+    <string name="ussd_failed">Abfragen des USSD-Codes fehlgeschlagen</string>
+    <string name="unable_get_balance">Auslesen des Guthabens fehlgeschlagen: %s</string>
+    <string name="phone_permissions_required">Telefon-Berechtigung benötigt</string>
+    <string name="notification_permission_denied">Benachrichtigungsberechtigung verweigert</string>
+    <string name="preferences">Einstellungen</string>
+    <string name="periodic_checks_title">Regelmäßig Guthaben abfragen</string>
+    <string name="periodic_checks_rate_title">Intervall</string>
+    <string name="periodic_checks_rate_four_times_a_day">Viermal pro Tag</string>
+    <string name="periodic_checks_rate_twice_a_day">Zweimal pro Tag</string>
+    <string name="periodic_checks_rate_once_a_week">Einmal pro Woche</string>
+    <string name="notify_balance_increased_title">Guthaben erhöht</string>
+    <string name="notify_balance_under_threshold_title">Guthaben unter Schwellenwert</string>
+    <string name="notify_balance_under_threshold_value_title">Schwellenwert</string>
+    <string name="notifications">Benachrichtigungen</string>
+    <string name="balance_increased">Guthaben wurde um %s erhöht</string>
+    <string name="threshold_reached">Guthaben unter Schwellenwert: %s</string>
+    <string name="channel_name_balance_increased">Guthaben erhöht</string>
+    <string name="channel_name_threshold_reached">Schwellenwert erreicht</string>
+    <string name="invalid_ussd_code">Ungültiger USSD-Code eingegeben</string>
+    <string name="invalid_subscription">Ungültige SIM-Karte ausgewählt, überprüfe die Einstellungen</string>
+    <string name="ussd_code">USSD-Code</string>
+    <string name="subscription_id">SIM-Karte</string>
+    <string name="ussd_code_summary">Die App fragt den USSD-Code %s ab, um das aktuelle Guthaben zu bekommen</string>
+    <string name="general">Allgemein</string>
+    <string name="clear_current_data">Alle Daten löschen</string>
+    <string name="no_data_hint">Wische nach unten, um das aktuelle Guthaben abzufragen. Vorher solltest du den USSD-Code in den Einstellungen überprüfen.</string>
+    <string name="channel_name_error">Fehler</string>
+    <string name="debug">Fehlersuche</string>
+    <string name="debug_provider_details">Details des Standardanbieter</string>
+    <string name="debug_last_ussd_response">Letzte USSD-Antwort</string>
+    <string name="debug_last_ussd_response_none">Es wurde noch keine Anfrage gestellt</string>
+    <string name="debug_last_ussd_response_invalid">Letzte Anfrage fehlgeschlagen mit Code %d</string>
+    <string name="debug_last_ussd_response_failed_to_complete">Letzte Anfrage konnte nicht abgeschlossen werden</string>
+    <string name="debug_last_ussd_response_failed_telephony_service_unavailable">Letzte Anfrage fehlgeschlagen, da der Telefondienst nicht verfügbar ist</string>
+    <string name="copied_to_clipboard">In Zwischenablage kopiert</string>
+    <string name="retry">Wiederholen</string>
+    <string name="confirm_first_request">Eine USSD-Anfrage wird an %s gestellt</string>
+    <string name="close">Schließen</string>
+    <string name="delete">Löschen</string>
+    <string name="delete_entry">Soll der Eintrag \"%s\" gelöscht werden?</string>
+    <string name="no_response_saved">Keine Antwort gespeichert</string>
+    <string name="last_update">Letzte Aktualisierung: %s</string>
+    <string name="widget_description">Neustes Guthaben anzeigen</string>
+    <!-- Export as CSV -->
+    <string name="export">Als CSV exportieren</string>
+    <string name="export_saved_file">Exportiert als \"%s\" im Download-Ordner</string>
+    <string name="export_error_saving_file">Export fehlgeschlagen</string>
+    <string name="export_csv_header_balance">Guthaben</string>
+    <string name="export_csv_header_data">Datum</string>
+    <!-- About menu -->
+    <string name="about">Über Prepaid-Guthaben</string>
+    <string name="error_no_browser_found">Kein Browser gefunden</string>
+</resources>

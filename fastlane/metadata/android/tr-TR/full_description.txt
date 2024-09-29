@@ -1,0 +1,2 @@
+Bu uygulama ön ödemeli bakiyenizi takip etmenizi sağlar. Bakiyeniz yapılandırılabilir bir sınırın altına düştüğünde bunu otomatik olarak kaydedebilir ve bir bildirim gönderebilir.
+Bunu ayarlarda ayarlanabilen bir USSD kodunun yanıtını ayrıştırarak yapar.

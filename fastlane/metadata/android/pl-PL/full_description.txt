@@ -1,0 +1,2 @@
+Aplikacja śledzi stan konta na kartę. Może automatycznie rejestrować i wysyłać powiadomienie, jeśli saldo spadnie poniżej konfigurowalnego progu.
+Robi to poprzez analizowanie odpowiedzi na kod USSD, który można ustawić w ustawieniach.

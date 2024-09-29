@@ -1,0 +1,2 @@
+Cette application permet de suivre votre solde prépayé. Il peut automatiquement l'enregistrer et poster une notification si votre solde tombe sous un seuil configurable.
+Il le fait en analysant la réponse d'un code USSD qui peut être défini dans les paramètres.

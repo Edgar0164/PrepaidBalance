@@ -1,0 +1,2 @@
+Tämä sovellus pitää kirjaa ennalta maksetusta saldosta. Se voi automaattisesti tallentaa sen ja lähettää ilmoituksen, jos saldo laskee säädettävän kynnyksen.
+Se tekee niin jäsentämällä vastauksen USSD-koodi, joka voidaan asettaa asetukset.

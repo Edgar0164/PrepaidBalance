@@ -1,0 +1,2 @@
+Denna app håller reda på ditt kontantsaldo. Det kan automatiskt spela in det och lägga upp en avisering om ditt saldo sjunker under en konfigurerbar tröskel.
+Det gör det genom att tolka svaret på en USSD-kod, som kan ställas in i inställningarna.

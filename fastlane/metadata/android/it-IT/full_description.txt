@@ -1,0 +1,2 @@
+Questa app tiene traccia del tuo saldo prepagato. Può registrare automaticamente e inviare una notifica se il saldo scende sotto una soglia configurabile.
+Lo fa analizzando la risposta di un codice USSD, che può essere impostato nelle impostazioni.

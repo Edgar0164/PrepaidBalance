@@ -1,12 +1,22 @@
-<resources>
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Translation instructions can be found in the Readme -->
+<resources
+        xmlns:tools="http://schemas.android.com/tools"
+        tools:ignore="MissingTranslation, ExtraTranslation">
     <string name="app_name">Prepaid Balance</string>
     <string name="ussd_failed">Failed to request USSD code</string>
-    <string name="current_balance">Current balance: %1$,.2f</string>
-    <string name="unable_get_balance">Unable to get balance from response</string>
-    <string name="check_now">Check now</string>
-    <string name="permissions_required">Phone permissions required</string>
+    <string name="unable_get_balance">Unable to get balance from response: %s</string>
+    <string name="phone_permissions_required">Phone permissions required</string>
+    <string name="notification_permission_denied">Notification permission denied</string>
     <string name="preferences">Settings</string>
     <string name="periodic_checks_title">Periodically check balance</string>
+    <string name="periodic_checks_rate_title">Interval</string>
+    <string name="periodic_checks_rate_four_times_a_day">Four times a day</string>
+    <string name="periodic_checks_rate_twice_a_day">Twice a day</string>
+    <string name="periodic_checks_rate_once_a_week">Once a week</string>
+    <string name="periodic_checks_rate_four_times_a_day_value" translatable="false">6</string>
+    <string name="periodic_checks_rate_twice_a_day_value" translatable="false">12</string>
+    <string name="periodic_checks_rate_once_a_week_value" translatable="false">168</string>
     <string name="notify_balance_increased_title">Balance increased</string>
     <string name="notify_balance_under_threshold_title">Balance under threshold</string>
     <string name="notify_balance_under_threshold_value_title">Threshold</string>
@@ -15,12 +25,44 @@
     <string name="threshold_reached">Balance is under threshold: %s</string>
     <string name="channel_name_balance_increased">Balance increased</string>
     <string name="channel_name_threshold_reached">Threshold reached</string>
-    <string name="invalid_ussd_code">Invalid USSD code entered. It must start with \'*\' and end with \'#\'.</string>
+    <string name="invalid_ussd_code">Invalid USSD code entered</string>
+    <string name="invalid_subscription">Invalid sim card selected, check settings</string>
     <string name="ussd_code">USSD code</string>
+    <string name="subscription_id">Sim card</string>
     <string name="ussd_code_summary">The app queries the USSD code %s to get the current balance</string>
+    <string name="ussd_code_default" translatable="false"/>
     <string name="general">General</string>
-    <string name="clear_current_data">Clear all current data</string>
-    <string name="no_data_hint">Swipe down to get your latest prepaid balance. You might want to check the configured USSD code in the settings first.</string>
-    <string name="clear_current_data_summary">Data older than 6 months is deleted automatically</string>
+    <string name="clear_current_data">Clear all data</string>
+    <string name="no_data_hint">Swipe down to get your latest prepaid balance. You should check the configured USSD code in the settings first.</string>
     <string name="channel_name_error">Error</string>
+    <string name="debug">Troubleshooting</string>
+    <string name="debug_provider_details">Default provider details</string>
+    <string name="debug_last_ussd_response">Last USSD response</string>
+    <string name="debug_last_ussd_response_none">No request has been made yet</string>
+    <string name="debug_last_ussd_response_invalid">Last request failed with code %d</string>
+    <string name="debug_last_ussd_response_failed_to_complete">Last request failed to complete</string>
+    <string name="debug_last_ussd_response_failed_telephony_service_unavailable">Last request failed, because telephony service is unavailable</string>
+    <string name="copied_to_clipboard">Copied to clipboard</string>
+    <string name="retry">Retry</string>
+    <string name="confirm_first_request">A USSD request will be made to %s</string>
+    <string name="close">Close</string>
+    <string name="delete">Delete</string>
+    <string name="delete_entry">Do you want do delete the entry \"%s\"?</string>
+    <string name="no_response_saved">No response saved</string>
+    <string name="last_update">Last update: %s</string>
+    <string name="widget_description">Show latest balance</string>
+
+    <!-- Export as CSV -->
+    <string name="export">Export as CSV</string>
+    <string name="export_saved_file">Exported as \"%s\" to downloads folder</string>
+    <string name="export_error_saving_file">Export failed</string>
+    <string name="export_csv_header_balance">Balance</string>
+    <string name="export_csv_header_data">Date</string>
+
+    <!-- About menu -->
+    <string name="about">About Prepaid Balance</string>
+    <string name="error_no_browser_found">No browser found</string>
+    <string name="aboutLibraries_description_special1_name" translatable="false">GitHub</string>
+    <string name="aboutLibraries_description_special2_name" translatable="false">F-Droid</string>
+    <string name="aboutLibraries_description_special3_name" translatable="false">Crowdin</string>
 </resources>

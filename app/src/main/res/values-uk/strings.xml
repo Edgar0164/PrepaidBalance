@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Translation instructions can be found in the Readme -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation, ExtraTranslation">
+    <string name="app_name">Передплачений баланс</string>
+    <string name="ussd_failed">Не вдалося запитати USSD-код</string>
+    <string name="unable_get_balance">Не вдалося отримати баланс із відповіді: %s</string>
+    <string name="phone_permissions_required">Потрібні дозволи для телефону</string>
+    <string name="notification_permission_denied">Немає дозволу на сповіщення</string>
+    <string name="preferences">Налаштування</string>
+    <string name="periodic_checks_title">Періодично перевіряйте баланс</string>
+    <string name="periodic_checks_rate_title">Інтервал</string>
+    <string name="periodic_checks_rate_four_times_a_day">Чотири рази на день</string>
+    <string name="periodic_checks_rate_twice_a_day">Двічі на день</string>
+    <string name="periodic_checks_rate_once_a_week">Раз на тиждень</string>
+    <string name="notify_balance_increased_title">Баланс збільшився</string>
+    <string name="notify_balance_under_threshold_title">Баланс під порогом</string>
+    <string name="notify_balance_under_threshold_value_title">Поріг</string>
+    <string name="notifications">Сповіщення</string>
+    <string name="balance_increased">Баланс збільшено на %s</string>
+    <string name="threshold_reached">Баланс нижче порогової суми: %s</string>
+    <string name="channel_name_balance_increased">Баланс збільшився</string>
+    <string name="channel_name_threshold_reached">Досягнуто поріг</string>
+    <string name="invalid_ussd_code">Введено недійсний код USSD</string>
+    <string name="invalid_subscription">Обрано невірну сім-карту, перевірте налаштування</string>
+    <string name="ussd_code">USSD код</string>
+    <string name="subscription_id">Sim-картка</string>
+    <string name="ussd_code_summary">Програма запитує USSD-код %s, щоб отримати поточний баланс</string>
+    <string name="general">Основне</string>
+    <string name="clear_current_data">Очистити всі дані</string>
+    <string name="no_data_hint">Проведіть пальцем вниз, щоб переглянути останній баланс передоплати. Спочатку слід перевірити налаштований USSD-код у налаштуваннях.</string>
+    <string name="channel_name_error">Помилка</string>
+    <string name="debug">Вирішення проблем</string>
+    <string name="debug_provider_details">Дані оператора за замовчуванням</string>
+    <string name="debug_last_ussd_response">Остання відповідь USSD</string>
+    <string name="debug_last_ussd_response_none">Жодного запиту ще не було</string>
+    <string name="debug_last_ussd_response_invalid">Помилка останнього запиту з кодом %d</string>
+    <string name="debug_last_ussd_response_failed_to_complete">Останній запит не виконано</string>
+    <string name="debug_last_ussd_response_failed_telephony_service_unavailable">Останній запит не вдався, оскільки послуга телефонії недоступна</string>
+    <string name="copied_to_clipboard">Скопійовано в буфер обміну</string>
+    <string name="retry">Повторити</string>
+    <string name="confirm_first_request">USSD-запит буде зроблено на %s</string>
+    <string name="close">Закрити</string>
+    <string name="no_response_saved">Відповідь не збережено</string>
+    <string name="last_update">Останнє оновлення: %s</string>
+    <!-- Export as CSV -->
+    <string name="export">Експорт в CSV</string>
+    <string name="export_saved_file">Експортовано як \"%s\" до папки завантажень</string>
+    <string name="export_error_saving_file">Помилка експорту</string>
+    <string name="export_csv_header_balance">Баланс</string>
+    <string name="export_csv_header_data">Дата</string>
+    <!-- About menu -->
+    <string name="about">Про додаток</string>
+    <string name="error_no_browser_found">Браузер не знайдено</string>
+</resources>

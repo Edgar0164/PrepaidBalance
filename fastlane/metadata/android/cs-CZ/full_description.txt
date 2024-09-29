@@ -1,0 +1,2 @@
+Tato aplikace sleduje Váš předplacený zůstatek. Může to automaticky zaznamenat a odeslat upozornění, pokud váš zůstatek klesne pod nastavitelnou prahovou hodnotu.
+Činí to tak, že analyzuje odezvu USSD kódu, který může být nastaven v nastavení.

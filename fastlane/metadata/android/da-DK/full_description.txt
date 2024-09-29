@@ -1,0 +1,2 @@
+Denne app holder styr på din forudbetalte saldo. Det kan automatisk registrere det og sende en meddelelse, hvis din saldo falder under en konfigurerbar tærskel.
+Det gør det ved at parsing svaret på en USSD-kode, der kan indstilles i indstillingerne.
