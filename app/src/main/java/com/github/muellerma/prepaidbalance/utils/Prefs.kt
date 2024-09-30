@@ -18,7 +18,6 @@ class Prefs(val context: Context) {
         }
 
     val ussdCode: String
-        get() = "*105#"
 
     var subscriptionId: Int?
         get() = sharedPrefs.getString("subscription_id", null)?.toIntOrNull()

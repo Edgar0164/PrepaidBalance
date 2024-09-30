@@ -1,20 +1,17 @@
 package com.github.muellerma.prepaidbalance.work
 
 import android.Manifest
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
-import android.os.Build
+import android.content.pm.PackageManager
 import android.os.Handler
 import android.os.Looper
-import android.telephony.SubscriptionManager
 import android.telephony.TelephonyManager
 import android.util.Log
-import androidx.annotation.RequiresApi
-import androidx.work.Constraints
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequest
-import androidx.work.WorkManager
+import androidx.annotation.StringRes
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationBuilderWithBuilderAccessor
+import androidx.core.app.NotificationCompat
+import androidx.preference.PreferenceManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.github.muellerma.prepaidbalance.R
@@ -27,252 +24,160 @@ import com.github.muellerma.prepaidbalance.utils.NotificationUtils.Companion.CHA
 import com.github.muellerma.prepaidbalance.utils.NotificationUtils.Companion.NOTIFICATION_ID_BALANCE_INCREASED
 import com.github.muellerma.prepaidbalance.utils.NotificationUtils.Companion.NOTIFICATION_ID_THRESHOLD_REACHED
 import com.github.muellerma.prepaidbalance.utils.NotificationUtils.Companion.getBaseNotification
-import com.github.muellerma.prepaidbalance.utils.Prefs
 import com.github.muellerma.prepaidbalance.utils.ResponseParser
 import com.github.muellerma.prepaidbalance.utils.formatAsCurrency
-import com.github.muellerma.prepaidbalance.utils.hasPermissions
 import com.github.muellerma.prepaidbalance.utils.isValidUssdCode
-import com.github.muellerma.prepaidbalance.utils.prefs
 import kotlinx.coroutines.*
-import java.time.Duration
-import kotlin.coroutines.resume
 
 class CheckBalanceWorker(
-    private val context: Context,
+    val context: Context,
     workerParams: WorkerParameters
-) : Worker(context, workerParams) {
-
-    @RequiresApi(Build.VERSION_CODES.Q)
+) :
+    Worker(context, workerParams)
+{
     override fun doWork(): Result {
-        CoroutineScope(Dispatchers.IO).launch {
-            checkBalanceSequential(applicationContext) { result, data ->
-                Log.d(TAG, "Got result $result")
-                // Manejar los errores y el resultado aquí
-                if (result != CheckResult.OK) {
-                    // Notificar en caso de error
-                    val errorMessage = when (result) {
-                        CheckResult.USSD_FAILED -> context.getString(R.string.ussd_failed)
-                        CheckResult.MISSING_PERMISSIONS -> context.getString(R.string.phone_permissions_required)
-                        CheckResult.PARSER_FAILED -> context.getString(R.string.unable_get_balance, data)
-                        CheckResult.SUBSCRIPTION_INVALID -> context.getString(R.string.invalid_ussd_code)
-                        CheckResult.USSD_INVALID -> context.getString(R.string.invalid_ussd_code)
-                        CheckResult.OK -> return@checkBalanceSequential
-                    }
+            checkBalance(applicationContext) { result ->
+                @StringRes val errorMessage = when (result) {
+                    CheckResult.USSD_FAILED -> R.string.ussd_failed
+                    CheckResult.MISSING_PERMISSIONS -> R.string.permissions_required
+                    CheckResult.PARSER_FAILED -> R.string.unable_get_balance
+                    CheckResult.USSD_INVALID -> R.string.invalid_ussd_code
+                    CheckResult.OK -> null
+                }
 
-                    val retryIntent = Intent(context, RetryBroadcastReceiver::class.java)
-                    val retryPendingIntent = PendingIntent.getBroadcast(
-                        context, 0, retryIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT
-                    )
-
+                errorMessage?.let {
                     val notification = getBaseNotification(context, CHANNEL_ID_ERROR)
-                        .setContentTitle(errorMessage)
-                        .addAction(
-                            R.drawable.ic_baseline_refresh_24,
-                            context.getString(R.string.retry),
-                            retryPendingIntent
-                        )
+                        .setContentTitle(context.getString(errorMessage))
 
-                    NotificationUtils.createChannels(context)
-                    NotificationUtils.manager(context)
+                    NotificationUtils
+                        .manager(context)
                         .notify(NotificationUtils.NOTIFICATION_ID_ERROR, notification.build())
                 }
             }
-        }
+
         return Result.success()
     }
 
     companion object {
         private val TAG = CheckBalanceWorker::class.java.simpleName
 
-        fun enqueueOrCancel(context: Context) {
-            val enable = context.prefs().periodicCheck
-            val rate = context.prefs().periodicCheckRateHours
-            Log.d(TAG, "enqueue($enable, $rate)")
-            rate ?: return
-
-            if (!enable) {
-                WorkManager.getInstance(context).cancelAllWork()
-                return
+        fun checkBalance(context: Context, callback: (CheckResult)->Unit) {
+            GlobalScope.launch(Dispatchers.IO) {
+                AppDatabase
+                    .get(context)
+                    .balanceDao()
+                    .deleteBefore(System.currentTimeMillis() - 6L * 30 * 24 * 60 * 60 * 1000) // 6 months
             }
 
-            WorkManager.getInstance(context).apply {
-                val request = PeriodicWorkRequest.Builder(
-                    CheckBalanceWorker::class.java,
-                    Duration.ofHours(rate)
-                )
-                    .setConstraints(Constraints.NONE)
-                    .build()
-
-                enqueueUniquePeriodicWork(
-                    "work",
-                    ExistingPeriodicWorkPolicy.UPDATE,
-                    request
-                )
-            }
-        }
-        //--------------//
-
-        //--------------//
-
-        @RequiresApi(Build.VERSION_CODES.Q)
-        suspend fun checkBalanceSequential(context: Context, callback: (CheckResult, String?) -> Unit) {
-            if (!context.hasPermissions(Manifest.permission.CALL_PHONE, Manifest.permission.READ_PHONE_STATE)) {
-                return callback(CheckResult.MISSING_PERMISSIONS, null)
+            if (ActivityCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.CALL_PHONE
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                return callback(CheckResult.MISSING_PERMISSIONS)
             }
 
-            val telephonyManager = context.getSystemService(TelephonyManager::class.java)
-            val subscriptionManager = context.getSystemService(SubscriptionManager::class.java)
-            val subscriptionInfoList = subscriptionManager.activeSubscriptionInfoList
+            val ussdResponseCallback = object : TelephonyManager.UssdResponseCallback() {
+                override fun onReceiveUssdResponse(
+                    telephonyManager: TelephonyManager?,
+                    request: String?,
+                    response: CharSequence?
+                ) {
+                    Log.d(TAG, "onReceiveUssdResponse($response)")
+                    val balance = ResponseParser.getBalance(response as String?)
+                        ?: return callback(CheckResult.PARSER_FAILED)
 
-            for (subscriptionInfo in subscriptionInfoList) {
-                val mcc = subscriptionInfo.mccString
-                val mnc = subscriptionInfo.mncString
-
-                if (mcc == "736" && mnc == "02") {
-                    val subscriptionId = subscriptionInfo.subscriptionId
-                    Log.d(TAG, "SubscriptionId que cumple con las condiciones: $subscriptionId")
-
-                    // Ejecutar secuencialmente
-                    val result = withContext(Dispatchers.IO) {
-                        executeUssdRequest(context, subscriptionId, telephonyManager)
-                    }
-
-                    if (result == CheckResult.OK) {
-                        callback(CheckResult.OK, null)
-                    } else {
-                        // Terminar si hay algún fallo en la primera SIM
-                        return
-                    }
-                }
-            }
-            callback(CheckResult.SUBSCRIPTION_INVALID, null)
-        }
-
-        private suspend fun executeUssdRequest(
-            context: Context,
-            subscriptionId: Int,
-            telephonyManager: TelephonyManager
-        ): CheckResult {
-            return suspendCancellableCoroutine { continuation ->
-                val ussdCode = context.prefs().ussdCode
-                if (!ussdCode.isValidUssdCode()) {
-                    continuation.resume(CheckResult.USSD_INVALID)
-                    return@suspendCancellableCoroutine
+                    handleNewBalance(context, balance, callback)
                 }
 
-                val ussdResponseCallback = object : TelephonyManager.UssdResponseCallback() {
-                    override fun onReceiveUssdResponse(
-                        telephonyManager: TelephonyManager?,
-                        request: String?,
-                        response: CharSequence?
-                    ) {
-                        Log.d(TAG, "onReceiveUssdResponse($response)")
-                        //------------------------//
-                        //------------------------//
-                        context.prefs().lastUssdResponse = response?.toString()
+                override fun onReceiveUssdResponseFailed(
+                    telephonyManager: TelephonyManager?,
+                    request: String?,
+                    failureCode: Int
+                ) {
+                    Log.d(TAG, "onReceiveUssdResponseFailed($failureCode)")
+                    return callback(CheckResult.USSD_FAILED)
+                }
+            }
 
-                        val balance = ResponseParser.getBalance(response as String?)
-                        if (balance != null) {
-                            handleNewBalance(context, balance, response)
-                            continuation.resume(CheckResult.OK)
-                        } else {
-                            continuation.resume(CheckResult.PARSER_FAILED)
-                        }
-                    }
+            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+            val ussdCode = prefs.getString("ussd_code", "").orEmpty()
+            if (!ussdCode.isValidUssdCode()) {
+                return callback(CheckResult.USSD_INVALID)
+            }
 
-                    override fun onReceiveUssdResponseFailed(
-                        telephonyManager: TelephonyManager?,
-                        request: String?,
-                        failureCode: Int
-                    ) {
-                        Log.d(TAG, "onReceiveUssdResponseFailed($failureCode)")
-                        continuation.resume(CheckResult.USSD_FAILED)
-                    }
+            context.getSystemService(TelephonyManager::class.java)
+                .sendUssdRequest(
+                    ussdCode,
+                    ussdResponseCallback,
+                    Handler(Looper.getMainLooper())
+                )
+        }
+
+        private fun handleNewBalance(context: Context, balance: Double, callback: (CheckResult) -> Unit) =
+            GlobalScope.launch(Dispatchers.IO) {
+                val database = AppDatabase.get(context)
+
+                val latestInDb = database.balanceDao().getLatest()
+                val new = BalanceEntry(timestamp = System.currentTimeMillis(), balance = balance)
+
+                database
+                    .balanceDao()
+                    .insert(new)
+
+                if (latestInDb?.nearlyEquals(new) == true) {
+                    Log.d(TAG, "Remove $latestInDb from db")
+                    database.balanceDao().delete(latestInDb)
                 }
 
-                telephonyManager.createForSubscriptionId(subscriptionId)
-                    .sendUssdRequest(ussdCode, ussdResponseCallback, Handler(Looper.getMainLooper()))
+                callback(CheckResult.OK)
+
+                val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+                if (prefs.getBoolean("notify_balance_increased", false) &&
+                    latestInDb != null &&
+                    new.balance > latestInDb.balance
+                ) {
+                    val diff = new.balance - latestInDb.balance
+                    Log.d(TAG, "New balance is larger: $diff")
+
+                    NotificationUtils.createChannels(context)
+
+                    val notification = getBaseNotification(context, CHANNEL_ID_BALANCE_INCREASED)
+                        .setContentTitle(context.getString(R.string.balance_increased, diff.formatAsCurrency()))
+
+                    NotificationUtils
+                        .manager(context)
+                        .notify(NOTIFICATION_ID_BALANCE_INCREASED, notification.build())
+                }
+
+                val threshold = try {
+                    prefs
+                        .getString("notify_balance_under_threshold_value", "")
+                        ?.replace(',', '.')
+                        ?.toDouble() ?: Double.MAX_VALUE
+                } catch (e: Exception) {
+                    Double.MAX_VALUE
+                }
+                if (
+                    prefs.getBoolean("notify_balance_under_threshold", false) &&
+                    new.balance < threshold
+                ) {
+                    NotificationUtils.createChannels(context)
+
+                    val notification = getBaseNotification(context, CHANNEL_ID_THRESHOLD_REACHED)
+                        .setContentTitle(context.getString(R.string.threshold_reached, new.balance.formatAsCurrency()))
+
+                    NotificationUtils
+                        .manager(context)
+                        .notify(NOTIFICATION_ID_THRESHOLD_REACHED, notification.build())
+                }
             }
-        }
-
-        private fun handleNewBalance(
-            context: Context,
-            balance: Double,
-            response: String?
-        ) = CoroutineScope(Dispatchers.IO).launch {
-            val database = AppDatabase.get(context)
-            val prefs = context.prefs()
-            prefs.lastUpdateTimestamp = System.currentTimeMillis()
-
-            val latestInDb = database.balanceDao().getLatest()
-            if (balance == latestInDb?.balance) {
-                Log.d(TAG, "New balance is equal to previous, don't insert")
-            } else {
-                val new = BalanceEntry(
-                    timestamp = System.currentTimeMillis(),
-                    balance = balance,
-                    fullResponse = response
-                )
-
-                Log.d(TAG, "Insert $new")
-                database.balanceDao().insert(new)
-
-                NotificationUtils.createChannels(context)
-                showBalancedIncreasedIfRequired(context, prefs, latestInDb, new)
-                showThresholdIfRequired(prefs, new, context)
-            }
-        }
-
-        private fun showThresholdIfRequired(
-            prefs: Prefs,
-            new: BalanceEntry,
-            context: Context
-        ) {
-            val threshold = prefs.notifyBalanceUnderThresholdValue
-            if (prefs.notifyBalanceUnderThreshold && new.balance < threshold) {
-                Log.d(TAG, "Below threshold")
-                val notification = getBaseNotification(context, CHANNEL_ID_THRESHOLD_REACHED)
-                    .setContentTitle(
-                        context.getString(
-                            R.string.threshold_reached,
-                            new.balance.formatAsCurrency()
-                        )
-                    )
-
-                NotificationUtils.manager(context)
-                    .notify(NOTIFICATION_ID_THRESHOLD_REACHED, notification.build())
-            }
-        }
-
-        private fun showBalancedIncreasedIfRequired(
-            context: Context,
-            prefs: Prefs,
-            latestInDb: BalanceEntry?,
-            new: BalanceEntry
-        ) {
-            if (prefs.notifyBalanceIncreased && latestInDb != null && new.balance > latestInDb.balance) {
-                val diff = new.balance - latestInDb.balance
-                Log.d(TAG, "New balance is larger: $diff")
-
-                val notification = getBaseNotification(context, CHANNEL_ID_BALANCE_INCREASED)
-                    .setContentTitle(
-                        context.getString(
-                            R.string.balance_increased,
-                            diff.formatAsCurrency()
-                        )
-                    )
-
-                NotificationUtils.manager(context)
-                    .notify(NOTIFICATION_ID_BALANCE_INCREASED, notification.build())
-            }
-        }
 
         enum class CheckResult {
             OK,
             MISSING_PERMISSIONS,
             PARSER_FAILED,
             USSD_FAILED,
-            SUBSCRIPTION_INVALID,
             USSD_INVALID
         }
     }
